@@ -23,8 +23,6 @@ import (
 	"encoding/json"
 )
 
-var consumer *iot_broker_client.Consumer
-
 func (this *Connector) InitConsumer() (consumer *iot_broker_client.Consumer, err error) {
 	consumer, err = iot_broker_client.NewConsumer(this.Config.AmqpUrl, "queue_"+this.Config.Protocol, this.Config.Protocol, false, func(msg []byte) error {
 		go this.handleMessage(string(msg))
