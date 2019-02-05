@@ -95,8 +95,8 @@ the auth token can be used to do http-requests in the name of the user:
 Use `LoadConfig(location string) (config Config, err error)` to read a configuration or instantiate is manually to pass it tio the Init() function.
  
 * ZookeeperUrl: url to the zookeeper service
-* KafkaResponseTopic: kafka topic to which command-responses should be send (`"response"` for the sepl-platform)
-* KafkaEventTopic: kafka topic to which event-messages should be send (`"eventfilter"` for the sepl-platform). Events will also be send to the topic `strings.Replace(serviceId, "#", "_", -1)`.
+* ResponseTopic: topic to which command-responses should be send (`"response"` for the sepl-platform)
+* EventTopic: topic to which event-messages should be send (`"eventfilter"` for the sepl-platform). Events will also be send to the topic `strings.Replace(serviceId, "#", "_", -1)`.
 * Protocol: references iot-device-repository.Protocol.ProtocolHandlerUrl. Is used as topic to consume device-commands on this protocol.
 * FatalKafkaErrors: if `"true"` the application will terminate if an kafka-error occurs.
 * KafkaTimeout: if > 0 the connector will send messages with `"topic_init"` to the protocol topic to ensure connection. if in the timeout span no message is received a fatal error will occur.
@@ -111,13 +111,14 @@ the `"topic_init"` message will be ignored by all sepl-kafka-consumers.
 * JwtPrivateKey: if set, GetUserToken() will use it to sign the resulting jwt.
 * JwtExpiration: expiration time of the jwt created by GetUserToken().
 * JwtIssuer: issuer of the jwt created by GetUserToken().
+* AmqpUrl: url to amqp broker to distibute event and response messages (parallel to kafka)
 
  
 ```
 type Config struct {
 	ZookeeperUrl       string //host1:2181,host2:2181/chroot
-	KafkaResponseTopic string
-	KafkaEventTopic    string
+	ResponseTopic string
+	EventTopic    string
 	Protocol           string
 	FatalKafkaErrors   string
 	KafkaTimeout       int64
@@ -134,5 +135,7 @@ type Config struct {
 	JwtPrivateKey            string
 	JwtExpiration            int64
 	JwtIssuer                string
+	
+	AmqpUrl		 string
 }
 ```

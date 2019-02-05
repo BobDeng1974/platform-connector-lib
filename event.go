@@ -89,8 +89,11 @@ func (this *Connector) handleEvent(token JwtToken, endpoint string, protocolPart
 			log.Println("ERROR: handleEvent::marshaling ", err)
 			fail++
 		} else {
-			this.produce(serviceTopic, string(jsonMsg))
-			this.produce(this.Config.KafkaEventTopic, string(jsonMsg))
+			this.produceKafka(serviceTopic, string(jsonMsg))
+			err = this.produce(this.Config.EventTopic, jsonMsg, deviceId, serviceId)
+			if err != nil {
+				log.Println("WARNING: unable to send event to platform", err)
+			}
 			success++
 		}
 	}

@@ -17,6 +17,7 @@
 package platform_connector_lib
 
 import (
+	"github.com/SENERGY-Platform/iot-broker-client"
 	"log"
 
 	"github.com/Shopify/sarama"
@@ -27,20 +28,26 @@ type CommandHandler func(endpoint string, protocolParts map[string]string) (resp
 type Connector struct {
 	Config         Config
 	CommandHandler CommandHandler //must be able to handle concurrent calls
-	producer       sarama.AsyncProducer
-	consumer       *RunnerTask
+	kafkaproducer  sarama.AsyncProducer
+	producer	   *iot_broker_client.Publisher
+	consumer       *iot_broker_client.Consumer
 	openid         *OpenidToken
 }
 
-func Init(config Config, commandHandler CommandHandler) (connector *Connector) {
-	connector = &Connector{Config: config, CommandHandler: commandHandler, producer: initProducer(config.ZookeeperUrl)}
-	connector.consumer = connector.initKafkaConsumer()
+func Init(config Config, commandHandler CommandHandler) (connector *Connector, err error) {
+	connector = &Connector{Config: config, CommandHandler: commandHandler, kafkaproducer: initKafkaProducer(config.ZookeeperUrl)}
+	connector.producer, err = InitProducer()
+	if err != nil {
+		return
+	}
+	connector.consumer, err = connector.InitConsumer()
 	return
 }
 
 func (this *Connector) Stop() {
+	this.kafkaproducer.Close()
 	this.producer.Close()
-	this.consumer.Stop()
+	this.consumer.Close()
 }
 
 func (this *Connector) HandleEvent(username string, password string, endpoint string, protocolParts map[string]string) (total int, success int, ignore int, fail int, err error) {

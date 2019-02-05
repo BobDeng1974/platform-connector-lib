@@ -17,43 +17,19 @@
 package platform_connector_lib
 
 import (
-	"log"
-	"time"
-
-	"sync"
-
-	"github.com/Shopify/sarama"
-	"github.com/wvanbergen/kazoo-go"
+	"github.com/SENERGY-Platform/iot-broker-client"
+	"github.com/SmartEnergyPlatform/iot-device-repository/lib/util"
 )
 
-var onceProducer sync.Once
-var producer sarama.AsyncProducer
 
-func initProducer(zkurl string) sarama.AsyncProducer {
-	var kz *kazoo.Kazoo
-	kz, err := kazoo.NewKazooFromConnectionString(zkurl, nil)
-	if err != nil {
-		log.Fatal("error in kazoo.NewKazooFromConnectionString()", err)
-	}
-	broker, err := kz.BrokerList()
-	kz.Close()
-
-	if err != nil {
-		log.Fatal("error in kz.BrokerList()", err)
-	}
-
-	sarama_conf := sarama.NewConfig()
-	sarama_conf.Version = sarama.V0_10_0_1
-	producer, err = sarama.NewAsyncProducer(broker, sarama_conf)
-	if err != nil {
-		log.Fatal("error in sarama.NewAsyncProducer()", broker, err)
-	}
-	return producer
+func InitProducer() (producer *iot_broker_client.Publisher,err error){
+	return iot_broker_client.NewPublisher(util.Config.AmqpUrl)
 }
 
-func (this *Connector) produce(topic string, message string) {
-	if this.Config.LogProduce == "true"{
-		log.Println("Produce", topic, message)
-	}
-	this.producer.Input() <- &sarama.ProducerMessage{Topic: topic, Key: nil, Value: sarama.StringEncoder(message), Timestamp: time.Now()}
+func (this *Connector) produce(topic string, message []byte, keys ...string)(err error) {
+	return this.producer.Publish(topic, message, keys...)
+}
+
+func (this *Connector) CloseProducer(){
+	this.producer.Close()
 }

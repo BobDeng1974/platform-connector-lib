@@ -17,90 +17,21 @@
 package platform_connector_lib
 
 import (
+	"github.com/SENERGY-Platform/iot-broker-client"
 	"log"
 
-	"time"
-
 	"encoding/json"
-
-	"os"
-
-	"github.com/Shopify/sarama"
-	"github.com/wvanbergen/kafka/consumergroup"
-	kazoo "github.com/wvanbergen/kazoo-go"
 )
 
-func (this *Connector) initKafkaConsumer() *RunnerTask {
-	if this.Config.SaramaLog == "true" {
-		sarama.Logger = log.New(os.Stderr, "[Sarama] ", log.LstdFlags)
-	}
-	return RunTask(func(shouldStop StopCheckFunc) error {
-		log.Println("Start KAFKA-Consumer")
-		this.produce(this.Config.Protocol, "topic_init")
+var consumer *iot_broker_client.Consumer
 
-		zk, chroot := kazoo.ParseConnectionString(this.Config.ZookeeperUrl)
-		kafkaconf := consumergroup.NewConfig()
-		kafkaconf.Consumer.Return.Errors = this.Config.FatalKafkaErrors == "true"
-		kafkaconf.Zookeeper.Chroot = chroot
-		consumerGroupName := this.Config.Protocol
-		consumer, err := consumergroup.JoinConsumerGroup(
-			consumerGroupName,
-			[]string{this.Config.Protocol},
-			zk,
-			kafkaconf)
-
-		if err != nil {
-			log.Fatal("error in consumergroup.JoinConsumerGroup()", err)
-		}
-
-		defer consumer.Close()
-
-		kafkaTimeout := this.Config.KafkaTimeout
-		useTimeout := true
-		if kafkaTimeout <= 0 {
-			useTimeout = false
-			kafkaTimeout = 3600
-		}
-		kafkaping := time.NewTicker(time.Second * time.Duration(kafkaTimeout/2))
-		defer kafkaping.Stop()
-		kafkatimout := time.NewTicker(time.Second * time.Duration(kafkaTimeout))
-		defer kafkatimout.Stop()
-
-		timeout := false
-
-		for {
-			if shouldStop() {
-				return nil
-			}
-			select {
-			case <-kafkaping.C:
-				if useTimeout && timeout {
-					this.produce(this.Config.Protocol, "topic_init")
-				}
-			case <-kafkatimout.C:
-				if useTimeout && timeout {
-					log.Fatal("ERROR: kafka missing ping timeout")
-				}
-				timeout = true
-			case errMsg := <-consumer.Errors():
-				log.Fatal("kafka consumer error: ", errMsg)
-			case msg, ok := <-consumer.Messages():
-				if !ok {
-					log.Fatal("empty kafka consumer")
-				} else {
-					if string(msg.Value) != "topic_init" {
-						err = this.handleMessage(string(msg.Value))
-					}
-					timeout = false
-					if err != nil {
-						log.Println("ERROR while handling msg:", string(msg.Value))
-					} else {
-						consumer.CommitUpto(msg)
-					}
-				}
-			}
-		}
+func (this *Connector) InitConsumer() (consumer *iot_broker_client.Consumer, err error) {
+	consumer, err = iot_broker_client.NewConsumer(this.Config.AmqpUrl, "queue_"+this.Config.Protocol, this.Config.Protocol, false, func(msg []byte) error {
+		go this.handleMessage(string(msg))
+		return nil
 	})
+	consumer.BindAll()
+	return
 }
 
 func (this *Connector) handleMessage(msg string) (err error) {

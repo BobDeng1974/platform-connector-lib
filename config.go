@@ -28,13 +28,13 @@ import (
 )
 
 type Config struct {
-	ZookeeperUrl       string //host1:2181,host2:2181/chroot
-	KafkaResponseTopic string
-	KafkaEventTopic    string
-	Protocol           string
-	FatalKafkaErrors   string
-	KafkaTimeout       int64
-	SaramaLog          string
+	ZookeeperUrl     string //host1:2181,host2:2181/chroot
+	ResponseTopic    string
+	EventTopic       string
+	Protocol         string
+	FatalKafkaErrors string
+	KafkaTimeout     int64
+	SaramaLog        string
 
 	IotRepoUrl string
 
@@ -48,6 +48,8 @@ type Config struct {
 	JwtPrivateKey string
 	JwtExpiration int64
 	JwtIssuer     string
+
+	AmqpUrl		 string
 }
 
 //loads config from json in location and used environment variables (e.g ZookeeperUrl --> ZOOKEEPER_URL)
