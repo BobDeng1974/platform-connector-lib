@@ -17,14 +17,14 @@
 package platform_connector_lib
 
 import (
-	"github.com/SENERGY-Platform/iot-broker-client"
+	"github.com/SENERGY-Platform/iot-broker-client-lib"
 	"log"
 
 	"encoding/json"
 )
 
-func (this *Connector) InitConsumer() (consumer *iot_broker_client.Consumer, err error) {
-	consumer, err = iot_broker_client.NewConsumer(this.Config.AmqpUrl, "queue_"+this.Config.Protocol, this.Config.Protocol, false, func(msg []byte) error {
+func (this *Connector) InitConsumer() (consumer *iot_broker_client_lib.Consumer, err error) {
+	consumer, err = iot_broker_client_lib.NewConsumer(this.Config.AmqpUrl, "queue_"+this.Config.Protocol, this.Config.Protocol, false, func(msg []byte) error {
 		go this.handleMessage(string(msg))
 		return nil
 	})

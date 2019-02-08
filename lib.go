@@ -17,7 +17,7 @@
 package platform_connector_lib
 
 import (
-	"github.com/SENERGY-Platform/iot-broker-client"
+	"github.com/SENERGY-Platform/iot-broker-client-lib"
 	"log"
 
 	"github.com/Shopify/sarama"
@@ -29,8 +29,8 @@ type Connector struct {
 	Config         Config
 	CommandHandler CommandHandler //must be able to handle concurrent calls
 	kafkaproducer  sarama.AsyncProducer
-	producer	   *iot_broker_client.Publisher
-	consumer       *iot_broker_client.Consumer
+	producer	   *iot_broker_client_lib.Publisher
+	consumer       *iot_broker_client_lib.Consumer
 	openid         *OpenidToken
 }
 
