@@ -1,4 +1,4 @@
-module github.com/SmartEnergyPlatform/platform-connector-lib
+module github.com/SENERGY-Platform/platform-connector-lib
 
 require (
 	github.com/SENERGY-Platform/iot-broker-client-lib v0.0.0-20190208074750-ac832f94c68b
