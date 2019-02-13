@@ -36,7 +36,7 @@ type Connector struct {
 
 func Init(config Config, commandHandler CommandHandler) (connector *Connector, err error) {
 	connector = &Connector{Config: config, CommandHandler: commandHandler, kafkaproducer: initKafkaProducer(config.ZookeeperUrl)}
-	connector.producer, err = InitProducer()
+	connector.producer, err = InitProducer(config.AmqpUrl)
 	if err != nil {
 		return
 	}

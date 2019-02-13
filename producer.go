@@ -18,12 +18,11 @@ package platform_connector_lib
 
 import (
 	"github.com/SENERGY-Platform/iot-broker-client-lib"
-	"github.com/SmartEnergyPlatform/iot-device-repository/lib/util"
 )
 
 
-func InitProducer() (producer *iot_broker_client_lib.Publisher,err error){
-	return iot_broker_client_lib.NewPublisher(util.Config.AmqpUrl)
+func InitProducer(amqpUrl string) (producer *iot_broker_client_lib.Publisher,err error){
+	return iot_broker_client_lib.NewPublisher(amqpUrl)
 }
 
 func (this *Connector) produce(topic string, message []byte, keys ...string)(err error) {
