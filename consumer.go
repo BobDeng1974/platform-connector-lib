@@ -25,10 +25,17 @@ import (
 
 func (this *Connector) InitConsumer() (consumer *iot_broker_client_lib.Consumer, err error) {
 	consumer, err = iot_broker_client_lib.NewConsumer(this.Config.AmqpUrl, "queue_"+this.Config.Protocol, this.Config.Protocol, false, func(msg []byte) error {
-		go this.handleMessage(string(msg))
-		return nil
+		return this.handleMessage(string(msg))
 	})
-	consumer.BindAll()
+	if err != nil {
+		log.Println("ERROR: unable to create amqp consumer", err)
+		return
+	}
+	err = consumer.BindAll()
+	if err != nil {
+		log.Println("ERROR: unable to bind consumer to all devices", err)
+		return
+	}
 	return
 }
 
