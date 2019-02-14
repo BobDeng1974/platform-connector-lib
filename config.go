@@ -49,7 +49,8 @@ type Config struct {
 	JwtExpiration int64
 	JwtIssuer     string
 
-	AmqpUrl		 string
+	AmqpUrl		 		string
+	AmqpPrefetchCount 	int64
 }
 
 //loads config from json in location and used environment variables (e.g ZookeeperUrl --> ZOOKEEPER_URL)

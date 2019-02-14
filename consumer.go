@@ -24,7 +24,7 @@ import (
 )
 
 func (this *Connector) InitConsumer() (consumer *iot_broker_client_lib.Consumer, err error) {
-	consumer, err = iot_broker_client_lib.NewConsumer(this.Config.AmqpUrl, "queue_"+this.Config.Protocol, this.Config.Protocol, false, func(msg []byte) error {
+	consumer, err = iot_broker_client_lib.NewConsumer(this.Config.AmqpUrl, "queue_"+this.Config.Protocol, this.Config.Protocol, false, int(this.Config.AmqpPrefetchCount), func(msg []byte) error {
 		return this.handleMessage(string(msg))
 	})
 	if err != nil {
